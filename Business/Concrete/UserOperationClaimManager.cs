@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using Business.BusinessAspect.Autofac;
 using Business.Constans;
 using Core.Entities.Concrete;
 using Core.Utilities.Business;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace Business.Concrete
 {
+    [SecuredOperation("Admin")]
     public class UserOperationClaimManager : IUserOperationClaimService
     {
         IUserOperationClaimDal _userOperationClaimDal;

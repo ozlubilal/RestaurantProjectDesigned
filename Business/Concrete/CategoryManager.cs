@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace Business.Concrete
 {
+    [SecuredOperation("User,Chef,Cashier,Admin")]
     public class CategoryManager : ICategoryService
     {
         ICategoryDal _categoryDal;

@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using Business.BusinessAspect.Autofac;
 using Business.Constans;
 using Core.Entities.Concrete;
 using Core.Utilities.Results;
@@ -12,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace Business.Concrete
 {
+   
     public class UserManager : IUserService
     {
         IUserDal _userDal;
@@ -25,7 +27,7 @@ namespace Business.Concrete
         {
             return _userDal.GetClaims(user);
         }
-
+        [SecuredOperation("Admin")]
         public void Add(User user)
         {
             _userDal.Add(user);
@@ -43,6 +45,7 @@ namespace Business.Concrete
         {
             return new SuccessDataResult<List<UserDetailDto>>(_userDal.GetUserDetails());
         }
+        [SecuredOperation("Admin")]
         public IResult Delete(User user)
         {
             _userDal.Delete(user);
@@ -53,7 +56,7 @@ namespace Business.Concrete
         {
             return new SuccessDataResult<User>(_userDal.Get(u=>u.Id == id));
         }
-
+        [SecuredOperation("Admin")]
         public IResult Update(User user)
         {
             _userDal.Update(user);

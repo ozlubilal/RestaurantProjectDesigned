@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using Business.BusinessAspect.Autofac;
 using Business.Constans;
 using Core.Aspects.AutoFac.Logging;
 using Core.CrossCuttingConcerns.Logging.Log4Net.Loggers;
@@ -16,6 +17,7 @@ using System.Threading.Tasks;
 
 namespace Business.Concrete
 {
+    [SecuredOperation("User,Chef,Cashier,Admin")]
     public class FloorManager : IFloorService
     {
         IFloorDal _floorDal;

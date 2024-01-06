@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 
 namespace Business.Concrete
 {
+    [SecuredOperation("User,Chef,Cashier,Admin")]
     public class OrderManager : IOrderService
     {
         IOrderDal _orderDal;

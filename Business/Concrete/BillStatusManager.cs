@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using Business.BusinessAspect.Autofac;
 using Business.Constans;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
@@ -9,8 +10,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace Business.Concrete
 {
+    [SecuredOperation("User,Chef,Cashier,Admin")]
     public class BillStatusManager : IBillStatusService
     {
         IBillStatusDal _billStatusDal;

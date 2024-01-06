@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using Business.BusinessAspect.Autofac;
 using Business.Constans;
 using Core.Utilities.Business;
 using Core.Utilities.Results;
@@ -13,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace Business.Concrete
 {
+    [SecuredOperation("User,Chef,Cashier,Admin")]
     public class StoreBillManager : IStoreBillService
     {
         IStoreBillDal _storeBillDal;

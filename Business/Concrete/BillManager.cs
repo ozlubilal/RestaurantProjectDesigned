@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using Business.BusinessAspect.Autofac;
 using Business.Constans;
 using Core.Utilities.Business;
 using Core.Utilities.Results;
@@ -13,12 +14,14 @@ using System.Threading.Tasks;
 
 namespace Business.Concrete
 {
+    [SecuredOperation("User,Chef,Cashier,Admin")]
     public class BillManager : IBillService
     {
         IBillDal _billDal;
         ITableService _tableService;
         IOrderService _orderService;
 
+       
         public BillManager(IBillDal billDal, ITableService tableService, IOrderService orderService)
         {
             _billDal = billDal;
@@ -75,7 +78,7 @@ namespace Business.Concrete
         {
             return new SuccessDataResult<Bill>(_billDal.Get(b => b.TableId == tableId && b.BillStatusId == statusId));
         }
-
+       
         public IDataResult<List<Bill>> GetList()
         {
             return new SuccessDataResult<List<Bill>>(_billDal.GetList().ToList());

@@ -1,8 +1,11 @@
 ﻿using Business.Abstract;
+using Business.BusinessAspect.Autofac;
 using Business.Constans;
 using Business.ValidationRules.FluentValidation;
 using Core.Aspects.AutoFac.Caching;
+using Core.Aspects.AutoFac.Exception;
 using Core.Aspects.AutoFac.Logging;
+using Core.Aspects.AutoFac.Performance;
 using Core.Aspects.AutoFac.Validation;
 using Core.CrossCuttingConcerns.Logging.Log4Net.Loggers;
 using Core.Utilities.Business;
@@ -19,6 +22,7 @@ using System.Threading.Tasks;
 
 namespace Business.Concrete
 {
+    [SecuredOperation("User,Chef,Cashier,Admin")]
     public class ProductManager : IProductService
     {
         IProductDal _productDal;
@@ -29,7 +33,8 @@ namespace Business.Concrete
             _productDal = productDal;
             _orderService = orderService;
         }
-        [CacheRemoveAspect("Get")]
+        [ExceptionLogAspect(typeof(FileLogger))]
+        [CacheRemoveAspect("IProductService.Get")]
         [ValidationAspect(typeof(ProductValidator))]
         public IResult Add(Product product)
         {
@@ -41,7 +46,7 @@ namespace Business.Concrete
             _productDal.Add(product);
             return new SuccessResult(Messages.AddedSuccess);
         }
-
+        [CacheRemoveAspect("IProductService.Get")]
         public IResult Delete(Product product)
         {
             var result = BusinessRules.Run(CheckIfOrderOfProductExist(product));
@@ -52,35 +57,36 @@ namespace Business.Concrete
             _productDal.Delete(product);
             return new SuccessResult(Messages.DeletedSuccess);
         }
-
+        [CacheAspect]
         public IDataResult<List<Product>> GetByCategoryId(int categoryId)
         {
             return new SuccessDataResult<List<Product>>(_productDal.GetList(p => p.CategoryId == categoryId).ToList());
         }
-
+        [CacheAspect]
         public IDataResult<Product> GetById(int id)
         {
             return new SuccessDataResult<Product>(_productDal.Get(p => p.Id == id));
 
         }
-
+        [CacheAspect]
         public IDataResult<List<Product>> GetByUnitsInStock(int unitInStock)
         {
             return new SuccessDataResult<List<Product>>(_productDal.GetList(p => p.UnitsInStock == unitInStock).ToList());
         }
-       // [CacheAspect]
+        [CacheAspect]
         [LogAspect(typeof(FileLogger))]
         public IDataResult<List<Product>> GetList()
         {
             return new SuccessDataResult<List<Product>>(_productDal.GetList().ToList());
         }
-       // [CacheAspect]
+        [PerformanceAspect(1)]
+        [CacheAspect]
         [LogAspect(typeof(FileLogger))]
         public IDataResult<List<ProductDetailDto>> GetListProductDetailDto()
         {
             return new SuccessDataResult<List<ProductDetailDto>>(_productDal.GetProductDetails());
         }
-
+        [CacheRemoveAspect("IProductService.Get")]
         public IResult Update(Product product)
         {
             var result = BusinessRules.Run(CheckIfProductNameExist(product));
