@@ -1,0 +1,30 @@
+﻿@model Business.Dtos.Requests.CategoryUpdateDto
+
+@{
+    ViewData["Title"] = "Update Category";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml"; // Eğer admin layout kullanıyorsanız
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+
+    <form asp-action="Update" method="post">
+        <div class="card">
+            <div class="card-header">
+                <h4>Kategori Bilgileri</h4>
+            </div>
+            <div class="card-body">
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <div class="form-group mb-3">
+                    <label asp-for="Name" class="form-label">Kategori Adı</label>
+                    <input asp-for="Name" class="form-control" placeholder="Kategori adı girin" required />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <button type="submit" class="btn btn-primary">Değişiklikleri Kaydet</button>
+                <a href="@Url.Action("Index", "Category")" class="btn btn-secondary">Geri Dön</a>
+            </div>
+        </div>
+    </form>
+</div>

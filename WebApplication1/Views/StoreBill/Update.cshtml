@@ -1,0 +1,41 @@
+﻿@model Business.Dtos.Requests.StoreBillUpdateDto
+
+@{
+    ViewData["Title"] = "Mağaza Faturasını Güncelle";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+
+    <form asp-action="Update" method="post">
+        <div class="card">
+            <div class="card-header">
+                <h4>Fatura Bilgileri</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <input type="hidden" asp-for="Id" />
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="TotalAmount" class="form-label">Toplam Tutar</label>
+                            <input asp-for="TotalAmount" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="TotalAmount" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="Status" class="form-label">Durum</label>
+                        <select asp-for="Status" class="form-control" asp-items="@(new SelectList(ViewBag.StatusList, "Value", "Text", Model.Status))">
+                            <option value="">Durum seçin</option> <!-- Varsayılan boş seçenek -->
+                        </select>
+                        <span asp-validation-for="Status" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <button type="submit" class="btn btn-primary">Güncelle</button>
+                <a href="@Url.Action("Index", "StoreBill")" class="btn btn-secondary">Geri Dön</a>
+            </div>
+        </div>
+    </form>
+</div>

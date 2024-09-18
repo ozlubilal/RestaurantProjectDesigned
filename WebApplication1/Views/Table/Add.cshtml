@@ -1,0 +1,40 @@
+﻿@model Business.Dtos.Requests.TableCreateDto
+
+@{
+    ViewData["Title"] = "Yeni Masa Ekle";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+
+    <form asp-action="Add" method="post">
+        <div class="card">
+            <div class="card-header">
+                <h4>Masa Bilgileri</h4>
+            </div>
+            <div class="card-body">
+                <div class="form-group mb-3">
+                    <label asp-for="TableName" class="form-label">Masa Adı</label>
+                    <input asp-for="TableName" class="form-control" placeholder="Masa adı girin" />
+                    <span asp-validation-for="TableName" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Status" class="form-label">Durum</label>
+                    <select asp-for="Status" class="form-select">
+                        <option value="">Durum seçin</option>
+                        <option value="1">Boş</option>
+                        <option value="2">Dolu</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <button type="submit" class="btn btn-primary">Ekle</button>
+                <a href="@Url.Action("Index")" class="btn btn-secondary">Geri Dön</a>
+            </div>
+        </div>
+    </form>
+</div>
+

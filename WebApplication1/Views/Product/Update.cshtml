@@ -1,0 +1,54 @@
+﻿@model Business.Dtos.Requests.ProductUpdateDto
+
+@{
+    ViewData["Title"] = "Ürün Güncelle";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml"; // Eğer admin layout kullanıyorsanız
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+
+    <form asp-action="Update" method="post">
+        <div class="card">
+            <div class="card-header">
+                <h4>Ürün Bilgileri</h4>
+            </div>
+            <div class="card-body">
+                <input type="hidden" name="Id" value="@Model.Id" />
+
+                <div class="form-group mb-3">
+                    <label asp-for="Name" class="form-label">Ürün Adı</label>
+                    <input asp-for="Name" class="form-control" placeholder="Ürün adı girin" required />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="CategoryId" class="form-label">Kategori</label>
+                    <select asp-for="CategoryId" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name"))" class="form-control">
+                        <option value="">Kategori seçin</option>
+                    </select>
+                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Price" class="form-label">Fiyat</label>
+                    <input asp-for="Price" class="form-control" placeholder="Fiyat girin" required />
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Status" class="form-label">Durum</label>
+                    <select asp-for="Status" class="form-control" asp-items="@(new SelectList(ViewBag.StatusList, "Value", "Text", Model.Status))">
+                        <option value="">Durum seçin</option> <!-- Varsayılan boş seçenek -->
+                    </select>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+
+            </div>
+            <div class="card-footer text-end">
+                <button type="submit" class="btn btn-primary">Değişiklikleri Kaydet</button>
+                <a href="@Url.Action("Index", "Product")" class="btn btn-secondary">Geri Dön</a>
+            </div>
+        </div>
+    </form>
+</div>
