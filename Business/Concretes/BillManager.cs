@@ -5,6 +5,7 @@ using Business.Dtos.Requests;
 using Business.Dtos.Responses;
 using Core.Utilities.Results;
 using DataAccess.Abstracts;
+using DataAccess.Concretes;
 using Entities.Concrete;
 using Entities.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +40,16 @@ namespace Business.Concrete
             return new SuccessDataResult<List<BillResponseDto>>(billDtos);
         }
 
+        public IDataResult<List<Bill>> GetAllBills()
+        {
+            // Table ilişkisini de yüklemek için Include kullanın
+            var bills = _billDal.GetList(
+                include: query => query.Include(b => b.Table) // Table ilişkisini yükle
+            );
 
+
+            return new SuccessDataResult<List<Bill>>(bills);
+        }
         public IDataResult<BillResponseDto> GetById(Guid id)
         {
             var bill = _billDal.Get(b => b.Id == id);
@@ -47,18 +57,37 @@ namespace Business.Concrete
             return new SuccessDataResult<BillResponseDto>(billDto);
         }
 
+        public IDataResult<Bill> GetBillById(Guid id)
+        {
+            var bill = _billDal.Get(b => b.Id == id);
+            return new SuccessDataResult<Bill>(bill);
+        }
         public IResult Add(BillCreateDto billCreateDto)
         {
             var bill = _mapper.Map<Bill>(billCreateDto);
-            bill.StoreBillId = _storeBillService.GetByStatus(StoreBillStatus.Open).Data.FirstOrDefault().Id;
+             bill.StoreBillId = _storeBillService.GetByStatus(StoreBillStatus.Açık).Data.FirstOrDefault().Id;
             _billDal.Add(bill);
             return new SuccessResult("Bill added successfully.");
         }
 
         public IResult Update(BillUpdateDto billUpdateDto)
         {
-            var bill = _mapper.Map<Bill>(billUpdateDto);
-            _billDal.Update(bill);
+
+            var existingBill = _billDal.Get(b => b.Id == billUpdateDto.Id);
+
+            if (existingBill == null)
+            {
+                return new ErrorResult("Bill not found.");
+            }
+          
+            _mapper.Map(billUpdateDto, existingBill);
+
+            if ((BillStatus)billUpdateDto.Status == BillStatus.Tahsil_Edildi)
+            {
+                existingBill.ClosedDate = DateTime.Now;  // Kapama tarihini şu anki zamana ayarla
+            }
+
+            _billDal.Update(existingBill);
             return new SuccessResult("Bill updated successfully.");
         }
 

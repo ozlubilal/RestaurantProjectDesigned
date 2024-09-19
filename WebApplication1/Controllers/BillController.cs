@@ -60,11 +60,12 @@ namespace RestaurantWepApp.Controllers
 
         // POST: /Bill/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
+       // [ValidateAntiForgeryToken]
         public IActionResult Add(BillCreateDto billCreateDto)
         {
             if (ModelState.IsValid)
             {
+              //  billCreateDto.StoreBillId = Guid.Parse("9843f59d-3d45-4387-79be-08dcd7549f7d");
                 var result = _billService.Add(billCreateDto);
                 if (result.Success)
                 {
@@ -94,21 +95,21 @@ namespace RestaurantWepApp.Controllers
             return NotFound();
         }
 
-        // POST: /Bill/Edit/5
+   
+       // [ValidateAntiForgeryToken]
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Update(Guid id, BillUpdateDto billUpdateDto)
+        public IActionResult Update(BillUpdateDto billUpdateDto)
         {
-            if (ModelState.IsValid)
+            var bill= _billService.GetBillById(billUpdateDto.Id).Data;
+            billUpdateDto.TableId = bill.TableId;
+            billUpdateDto.StoreBillId= bill.StoreBillId;
+            billUpdateDto.TotalAmount= bill.TotalAmount;
+            var result = _billService.Update(billUpdateDto);
+            if (result.Success)
             {
-                var result = _billService.Update(billUpdateDto);
-                if (result.Success)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
-                ModelState.AddModelError("", result.Message);
+                return Json(new { success = true });
             }
-            return View(billUpdateDto);
+            return Json(new { success = false, message = result.Message });
         }
 
         // POST: /Bill/Delete/5

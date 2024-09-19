@@ -8,5 +8,6 @@ public class BillUpdateDto:IDto
     public Guid TableId { get; set; }
     public Guid StoreBillId { get; set; }
     public decimal TotalAmount { get; set; }
+    public DateTime? ClosedDate { get; set; }
     public int Status { get; set; } // Enum int olarak tutulabilir veya string
 }

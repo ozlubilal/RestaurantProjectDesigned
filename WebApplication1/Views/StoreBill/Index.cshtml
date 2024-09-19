@@ -24,6 +24,7 @@
                     <tr>
                         <th>#</th>
                         <th>Başlangıç Tarihi</th>
+                        <th>Bitiş Tarihi</th>
                         <th>Toplam Tutar</th>
                         <th>Durum</th>
                         <th>İşlemler</th>
@@ -36,6 +37,7 @@
                         <tr>
                             <td>@(i + 1)</td>
                             <td>@storeBill.CreatedDate</td>
+                            <td>@storeBill.ClosedDate</td>
                             <td>@storeBill.TotalAmount.ToString("C")</td>
                             <td>@storeBill.Status</td>
                             <td>

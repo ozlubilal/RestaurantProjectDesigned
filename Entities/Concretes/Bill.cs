@@ -11,6 +11,8 @@ public class Bill : BaseEntity<Guid>
     public Guid StoreBillId { get; set; }
     public decimal TotalAmount { get; set; }
 
+    public DateTime? ClosedDate { get; set; }
+
     //NavigationProperty
     public Table? Table { get; set; }
     public StoreBill StoreBill { get; set; }

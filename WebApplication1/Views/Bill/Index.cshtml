@@ -24,6 +24,8 @@
                     <tr>
                         <th>#</th>
                         <th>Masa Numarası</th>
+                        <th>Açılış Tarihi</th>
+                        <th>Kapanış Tarihi</th>
                         <th>Toplam Tutar</th>
                         <th>Durum</th>
                         <th>İşlemler</th>
@@ -36,13 +38,15 @@
                         <tr>
                             <td>@(i + 1)</td>
                             <td>@bill.TableName</td>
-                            <td>@bill.TotalAmount.ToString("C")</td>
+                            <td>@bill.CreatedDate</td>
+                            <td>@bill.ClosedDate</td>
+                            <td>@bill.TotalAmount</td>
                             <td>@bill.Status</td>
                             <td>
-                                <!-- Edit Button -->
-                             @*   <a class="btn btn-warning btn-sm text-white me-2" asp-action="Update" asp-route-id="@bill.Id">
-                                    Düzenle
-                                </a>*@
+                                <!-- Change Status Button -->
+                                <button class="btn btn-info btn-sm me-2" onclick="showChangeStatusModal('@bill.Id', '@bill.Status')">
+                                    Durum Değiştir
+                                </button>
 
                                 <!-- Delete Button -->
                                 <button class="btn btn-danger btn-sm" onclick="deleteBill('@bill.Id')">
@@ -57,9 +61,37 @@
     </div>
 </div>
 
+<!-- Change Status Modal -->
+<div class="modal fade" id="changeStatusModal" tabindex="-1" aria-labelledby="changeStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changeStatusModalLabel">Durum Değiştir</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="billId" />
+                <div class="mb-3">
+                    <label for="statusSelect" class="form-label">Yeni Durum</label>
+                    <select class="form-select" id="statusSelect">
+                        <option value="">Durum Seç</option>
+                        <!-- Enum'dan durumları doldur -->
+                        <option value="1">Aktif</option>
+                        <option value="2">Tahsil_Edildi</option>
+                        <!-- Diğer durumlar buraya eklenecek -->
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="button" class="btn btn-primary" onclick="changeBillStatus()">Güncelle</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
-        // JavaScript code for handling AJAX requests and UI interactions
         $(document).ready(function () {
             // JavaScript for delete action
             window.deleteBill = function (id) {
@@ -79,6 +111,37 @@
                         }
                     });
                 }
+            };
+
+            // Show modal with current status and bill id
+            window.showChangeStatusModal = function (billId, currentStatus) {
+                $('#billId').val(billId);
+                $('#statusSelect').val(currentStatus); // Mevcut durumu seçili yap
+                $('#changeStatusModal').modal('show');
+            };
+
+            // Change bill status
+            window.changeBillStatus = function () {
+                var billId = $('#billId').val();
+                var newStatus = $('#statusSelect').val();
+                $.ajax({
+                    url: '@Url.Action("Update", "Bill")',
+                    type: 'POST',
+                    data: {
+                        Id: billId,
+                        Status: newStatus
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function () {
+                        alert('Durum güncellenirken bir hata oluştu.');
+                    }
+                });
             };
         });
     </script>

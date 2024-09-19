@@ -12,4 +12,5 @@ public class StoreBill : BaseEntity<Guid>
 {
     public decimal TotalAmount { get; set; } // Günlük toplam tutar
     public StoreBillStatus Status { get; set; } // Açık/Kapalı durumu
+    public DateTime? ClosedDate { get; set; }
 }

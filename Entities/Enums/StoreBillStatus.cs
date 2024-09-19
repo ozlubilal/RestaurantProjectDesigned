@@ -8,7 +8,7 @@ namespace Entities.Enums;
 
 public enum StoreBillStatus
 {
-    Open=1,   
-    Closed=2, 
-    Cancelled=3
+    Açık=1,   
+    Kapalı=2, 
+    İptal_Edildi=3
 }
