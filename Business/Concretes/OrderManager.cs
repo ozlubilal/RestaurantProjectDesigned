@@ -4,7 +4,9 @@ using Business.Dtos.Requests;
 using Business.Dtos.Responses;
 using Core.Utilities.Results;
 using DataAccess.Abstracts;
+using DataAccess.Concretes;
 using Entities.Concrete;
+using Microsoft.EntityFrameworkCore;
 
 namespace Business.Concretes;
 
@@ -19,9 +21,13 @@ public class OrderManager : IOrderService
         _mapper = mapper;
     }
 
+
     public IDataResult<List<OrderResponseDto>> GetList()
     {
-        var orders = _orderDal.GetList();
+        var orders = _orderDal.GetList(
+            include: o => o
+            .Include(b => b.Bill).ThenInclude(t => t.Table)
+            .Include(p => p.Product).ThenInclude(p=>p.Category));
         var orderDtos = _mapper.Map<List<OrderResponseDto>>(orders);
         return new SuccessDataResult<List<OrderResponseDto>>(orderDtos);
     }
@@ -35,10 +41,17 @@ public class OrderManager : IOrderService
 
     public IDataResult<List<OrderResponseDto>> GetByBillId(Guid billId)
     {
-        var orders = _orderDal.GetList(o => o.BillId == billId);
+        var orders = _orderDal.GetList(
+            include: o => o
+                .Include(b => b.Bill).ThenInclude(t => t.Table)
+                .Include(p => p.Product),
+            predicate: o => o.BillId == billId // Burada BillId ile filtreleme ekledik
+        );
+
         var orderDtos = _mapper.Map<List<OrderResponseDto>>(orders);
         return new SuccessDataResult<List<OrderResponseDto>>(orderDtos);
     }
+
 
     public IDataResult<List<OrderResponseDto>> GetByProductId(Guid productId)
     {
@@ -56,8 +69,22 @@ public class OrderManager : IOrderService
 
     public IResult Update(OrderUpdateDto orderUpdateDto)
     {
-        var order = _mapper.Map<Order>(orderUpdateDto);
-        _orderDal.Update(order);
+        //var order = _mapper.Map<Order>(orderUpdateDto);
+        //_orderDal.Update(order);
+
+        var existingOrder = _orderDal.Get(p => p.Id == orderUpdateDto.Id);
+
+        if (existingOrder == null)
+        {
+            return new ErrorResult("Product not found.");
+        }
+
+       // _mapper.Map(orderUpdateDto, existingOrder);
+        existingOrder.Id = orderUpdateDto.Id;
+        existingOrder.Quantity= orderUpdateDto.Quantity;
+        existingOrder.Status= orderUpdateDto.Status;
+        _orderDal.Update(existingOrder);
+
         return new SuccessResult("Order updated successfully.");
     }
 
@@ -71,4 +98,19 @@ public class OrderManager : IOrderService
         }
         return new ErrorResult("Order not found.");
     }
+
+    public IDataResult<List<OrderResponseDto>> GetByTableId(Guid tableId)
+    {
+        // Order -> Bill -> Table ilişkisi üzerinden sorgulama yapıyoruz
+        var orders = _orderDal.GetList(
+            include: o => o
+                .Include(o => o.Bill).ThenInclude(b => b.Table) // Bill üzerinden Table'a erişim sağlanıyor
+                .Include(o => o.Product), // Ayrıca Product bilgilerini de getiriyoruz
+            predicate: o => o.Bill.TableId == tableId // TableId ile filtreleme
+        );
+
+        var orderDtos = _mapper.Map<List<OrderResponseDto>>(orders);
+        return new SuccessDataResult<List<OrderResponseDto>>(orderDtos);
+    }
+
 }

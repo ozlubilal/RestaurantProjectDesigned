@@ -39,22 +39,22 @@ namespace DataAccess.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("48cfe384-68d4-4ef3-9666-9808d1dfb8dc"),
+                            Id = new Guid("374aa369-6a2a-4724-ad7a-dacd99b8cc98"),
                             Name = "Admin"
                         },
                         new
                         {
-                            Id = new Guid("9c33e5d0-414c-4794-a416-816c4aadb402"),
+                            Id = new Guid("bf207f74-8565-47ee-8b01-fac848b4440d"),
                             Name = "Waiter"
                         },
                         new
                         {
-                            Id = new Guid("2acfe2f8-380c-452e-aca5-4dcddf80d64e"),
+                            Id = new Guid("d1121783-6353-4803-86f1-69f021337123"),
                             Name = "Chef"
                         },
                         new
                         {
-                            Id = new Guid("fed14103-14ff-4b4d-a17d-6300d603e173"),
+                            Id = new Guid("ef683efb-8bb8-4d4d-a3e9-a2e22adb32ac"),
                             Name = "Cashier"
                         });
                 });
@@ -125,7 +125,7 @@ namespace DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("ClosedDate")
+                    b.Property<DateTime?>("ClosedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("CreatedDate")
@@ -250,13 +250,45 @@ namespace DataAccess.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("Entities.Concretes.Payment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("BillId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BillId");
+
+                    b.ToTable("Payments");
+                });
+
             modelBuilder.Entity("Entities.Concretes.StoreBill", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("ClosedDate")
+                    b.Property<DateTime?>("ClosedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("CreatedDate")
@@ -349,6 +381,17 @@ namespace DataAccess.Migrations
                     b.Navigation("Bill");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Entities.Concretes.Payment", b =>
+                {
+                    b.HasOne("Entities.Concrete.Bill", "Bill")
+                        .WithMany()
+                        .HasForeignKey("BillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bill");
                 });
 
             modelBuilder.Entity("Product", b =>

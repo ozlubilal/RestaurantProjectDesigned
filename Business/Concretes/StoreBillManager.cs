@@ -1,7 +1,11 @@
 ﻿using AutoMapper;
+using Business.Abstract;
 using Business.Abstracts;
+using Business.BusinessRule;
+using Business.Constants;
 using Business.Dtos.Requests;
 using Business.Dtos.Responses;
+using Core.Utilities.Business;
 using Core.Utilities.Results;
 using DataAccess.Abstracts;
 using Entities.Concretes;
@@ -12,11 +16,13 @@ namespace Business.Concretes;
 public class StoreBillManager : IStoreBillService
 {
     private readonly IStoreBillDal _storeBillDal;
+    private readonly StoreBillBusinessRules _storeBillBusinessRules;
     private readonly IMapper _mapper;
 
-    public StoreBillManager(IStoreBillDal storeBillDal, IMapper mapper)
+    public StoreBillManager(IStoreBillDal storeBillDal, StoreBillBusinessRules storeBillBusinessRules, IMapper mapper)
     {
         _storeBillDal = storeBillDal;
+        _storeBillBusinessRules = storeBillBusinessRules;
         _mapper = mapper;
     }
 
@@ -30,7 +36,14 @@ public class StoreBillManager : IStoreBillService
     public IDataResult<StoreBillResponseDto> GetById(Guid id)
     {
         var storeBill = _storeBillDal.Get(sb => sb.Id == id);
+
+        if (storeBill == null)
+        {
+            return new ErrorDataResult<StoreBillResponseDto>(Messages.StoreBillNotFound);
+        }
+
         var storeBillDto = _mapper.Map<StoreBillResponseDto>(storeBill);
+
         return new SuccessDataResult<StoreBillResponseDto>(storeBillDto);
     }
 
@@ -43,9 +56,16 @@ public class StoreBillManager : IStoreBillService
 
     public IResult Add(StoreBillCreateDto storeBillCreateDto)
     {
+        IResult result = BusinessRules.Run(_storeBillBusinessRules.CheckIfActiveStoreBillExists());
+
+        if (result != null)
+        {
+            return result;
+        }
+
         var storeBill = _mapper.Map<StoreBill>(storeBillCreateDto);
         _storeBillDal.Add(storeBill);
-        return new SuccessResult("StoreBill added successfully.");
+        return new SuccessResult(Messages.StoreBillAdded);
     }
 
     public IResult Update(StoreBillUpdateDto storeBillUpdateDto)
@@ -54,16 +74,14 @@ public class StoreBillManager : IStoreBillService
         var existingStoreBill = _storeBillDal.Get(sb => sb.Id == storeBillUpdateDto.Id);
         if (existingStoreBill == null)
         {
-            return new ErrorResult("StoreBill not found.");
-           
+            return new ErrorResult(Messages.StoreBillNotFound);
+
         }
 
-        // DTO'yu mevcut varlık üzerine eşle
         _mapper.Map(storeBillUpdateDto, existingStoreBill);
 
-        // Güncelleme işlemi
         _storeBillDal.Update(existingStoreBill);
-        return new SuccessResult("StoreBill updated successfully.");
+        return new SuccessResult(Messages.StoreBillUpdated);
     }
 
     public IResult Delete(Guid id)
@@ -71,9 +89,16 @@ public class StoreBillManager : IStoreBillService
         var storeBill = _storeBillDal.Get(sb => sb.Id == id);
         if (storeBill != null)
         {
+            IResult result = BusinessRules.Run(_storeBillBusinessRules.CheckIfStoreBillHasBills(id));
+
+            if (result != null)
+            {
+                return result;
+            }
+
             _storeBillDal.Delete(storeBill);
-            return new SuccessResult("StoreBill deleted successfully.");
+            return new SuccessResult(Messages.StoreBillDeleted);
         }
-        return new ErrorResult("StoreBill not found.");
+        return new ErrorResult(Messages.StoreBillNotFound);
     }
 }

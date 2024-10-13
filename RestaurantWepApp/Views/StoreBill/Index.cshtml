@@ -1,0 +1,312 @@
+﻿@model List<Business.Dtos.Responses.StoreBillResponseDto>
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "StoreBills";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Mağaza Faturaları</h2>
+
+    <a class="btn btn-primary mb-3" asp-action="Add">
+        Yeni StoreBill Ekle
+    </a>
+
+    <div class="card">
+        <div class="card-header">
+            <h5>Günlük Mağaza Hesapları Listesi</h5>
+        </div>
+        <div class="card-body">
+            <table class="table store-bill-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Başlangıç Tarihi</th>
+                        <th>Bitiş Tarihi</th>
+                        <th>Toplam Tutar</th>
+                        <th>Durum</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        var storeBill = Model[i];
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td>@storeBill.CreatedDate.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@(storeBill.ClosedDate.HasValue ? storeBill.ClosedDate.Value.ToString("dd.MM.yyyy HH:mm") : "Açık")</td>
+                            <td>@storeBill.TotalAmount.ToString("C")</td>
+                            <td>@storeBill.Status</td>
+                            <td>
+                                <a class="btn btn-secondary btn-sm btn-spacing text-white" href="javascript:void(0);" onclick="openStatusModal('@storeBill.Id', '@storeBill.Status')">Durum Değiştir</a>
+                                <button class="btn btn-danger btn-sm btn-spacing" onclick="deleteStoreBill('@storeBill.Id')">Sil</button>
+                                <button class="btn btn-info btn-sm" onclick="toggleBills('@storeBill.Id', this)">Masa Hesapları</button>
+                            </td>
+
+                        </tr>
+
+                        <tr class="bill-details" id="bills-@storeBill.Id" style="display:none;">
+                            <td colspan="6">
+                                <div class="bill-details-container">
+                                    <h5 class="center">Masa Hesapları</h5>
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr class="bg-info">
+                                                <th>#</th>
+                                                <th>Masa Numarası</th>
+                                                <th>Açılış Tarihi</th>
+                                                <th>Kapanış Tarihi</th>
+                                                <th>Toplam Tutar</th>
+                                                <th>Durum</th>
+                                                <th>İşlemler</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="bill-list-@storeBill.Id">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- StoreBillStatus Güncelleme Modalı -->
+<div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusModalLabel">StoreBill Durumunu Güncelle</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <select id="statusSelect" class="form-control">
+                    <option value="">Durum Seçin</option>
+                    @foreach (var status in Enum.GetValues(typeof(Entities.Enums.StoreBillStatus)))
+                    {
+                        <option value="@((int)status)">@status</option>
+                    }
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                <button type="button" class="btn btn-primary" id="confirmStatusChange">Onayla</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--BillStatus Güncelleme Modalı -->
+<div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusModalLabel">Yeni Durum Seçin</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <select id="statusSelect" class="form-control">
+                    <option value="">Durum Seçin</option>
+                    <option value="1">Aktif</option>
+                    <option value="2">Tahsil Edildi</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                <button type="button" class="btn btn-primary" id="confirmStatusChange">Onayla</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        //delete StoreBill
+        $(document).ready(function () {
+            window.deleteStoreBill = function (id) {
+                if (confirm('Bu StoreBill kaydını silmek istediğinizden emin misiniz?')) {
+                    $.ajax({
+                        url: '@Url.Action("Delete", "StoreBill")/' + id,
+                        type: 'POST',
+                        success: function (response) {
+                            if (response.success) {
+                                location.reload();
+                            } else {
+                                alert(response.message);
+                            }
+                        },
+                        error: function () {
+                            alert('StoreBill silinirken bir hata oluştu.');
+                        }
+                    });
+                }
+            };
+
+            // storeBill CahngeStatus
+            $(document).ready(function () {
+                window.openStatusModal = function (storeBillId, currentStatus) {
+                    $('#statusModal').data('storeBillId', storeBillId).modal('show');
+
+                    $('#confirmStatusChange').off('click').on('click', function () {
+                        var selectedStatus = $('#statusSelect').val();
+                        if (selectedStatus) {
+                            var dataToSend = {
+                                Id: storeBillId,
+                                Status: parseInt(selectedStatus)
+                            };
+
+                            $.ajax({
+                                url: '@Url.Action("Update", "StoreBill")',
+                                type: 'POST',
+                                data: dataToSend,
+                                success: function (response) {
+                                    if (response.success) {
+                                      //  alert(response.message); // Başarı mesajını göster
+                                        location.reload(); // Sayfayı yenile
+                                    } else {
+                                        alert(response.message || "Durum güncellenirken bir hata oluştu.");
+                                    }
+                                },
+                                error: function () {
+                                    alert('Durum güncellenirken bir hata oluştu.');
+                                }
+                            });
+
+                            $('#statusModal').modal('hide');
+                        } else {
+                            alert("Lütfen bir durum seçin.");
+                        }
+                    });
+                };
+
+            });
+
+
+         
+
+
+            //bill List 
+
+            window.toggleBills = function (storeBillId, button) {
+                var billDetailsRow = document.getElementById('bills-' + storeBillId);
+                var billList = document.getElementById('bill-list-' + storeBillId);
+
+                if (billDetailsRow.style.display === 'none') {
+                    $.ajax({
+                        url: '@Url.Action("GetBills", "StoreBill")/' + storeBillId,
+                        type: 'GET',
+                        success: function (data) {
+                            if (data.success) {
+                                billList.innerHTML = ''; // Önceki verileri temizle
+                                data.bills.forEach(function (bill, index) {
+                                    var totalAmountFormatted = bill.totalAmount !== undefined ?
+                                        bill.totalAmount.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }) :
+                                        '0,00';
+
+                                    var closedDateFormatted = bill.closedDate ?
+                                        new Date(bill.closedDate).toLocaleDateString('tr-TR') : 'Açık';
+
+                                    var row =
+                                        `<tr>
+                                                                <td>${index + 1}</td>
+                                                                <td>${bill.tableName || 'N/A'}</td>
+                                                                <td>${new Date(bill.createdDate).toLocaleDateString('tr-TR')}</td>
+                                                                <td>${closedDateFormatted}</td>
+                                                                <td>${totalAmountFormatted}</td>
+                                                                <td>${bill.status}</td>
+                                                                <td>
+                                                                    <button class="btn btn-secondary btn-sm" onclick="changeBillStatus('${bill.id}', this)">Durum Değiştir</button>
+                                                                    <button class="btn btn-danger btn-sm" onclick="deleteBill('${bill.id}')">Sil</button>
+                                                                    <button class="btn btn-warning btn-sm" onclick="window.location.href='@Url.Action("ListByBilId", "Order")/${bill.id}'">Siparişlere Git</button>
+                                                                </td>
+
+                                                            </tr>`;
+                                    billList.innerHTML += row; // Yeni verileri ekle
+                                });
+                            } else {
+                                alert(data.message);
+                            }
+                        },
+                        error: function () {
+                            alert('Bill\'ler alınırken bir hata oluştu.');
+                        }
+                    });
+                    billDetailsRow.style.display = ''; // Detayları göster
+                } else {
+                    billDetailsRow.style.display = 'none'; // Detayları gizle
+                }
+            };
+        });
+
+        //delete Bill
+        //delete Bill
+        $(document).ready(function () {
+            window.deleteBill = function (id) {
+                if (confirm('Bu masa hesabı kaydını silmek istediğinizden emin misiniz?')) {
+                    $.ajax({
+                        url: '@Url.Action("Delete", "Bill")/' + id,
+                        type: 'POST',
+                        success: function (response) {
+                            if (response.success) {
+                                location.reload();
+                            } else {
+                                alert(response.message);
+                            }
+                        },
+                        error: function () {
+                            alert('Bill silinirken bir hata oluştu.');
+                        }
+                    });
+                }
+            };
+        });
+
+
+
+
+        //billSatus Update
+
+        window.changeBillStatus = function (billId, button) {
+            $('#statusModal').data('billId', billId).modal('show'); // Modalı göster
+
+            // Onay butonuna tıklandığında
+            $('#confirmStatusChange').off('click').on('click', function () {
+                var selectedValue = $('#statusSelect').val();
+                if (selectedValue) {
+                    var billId = $('#statusModal').data('billId'); // BillId'yi modaldan al
+                    var dataToSend = {
+                        Id: billId,
+                        Status: parseInt(selectedValue) // DTO'nun özelliği ile uyumlu olmalı
+                    };
+
+                    $.ajax({
+                        url: '@Url.Action("BillUpdate", "StoreBill")',
+                        type: 'POST',
+                        data: dataToSend,
+                        success: function (response) {
+                            if (response.success) {
+                                location.reload(); // Sayfayı yenile
+                            } else {
+                                alert(response.message);
+                            }
+                        },
+                        error: function () {
+                            alert('Durum güncellenirken bir hata oluştu.');
+                        }
+                    });
+                    $('#statusModal').modal('open'); // Modalı kapat
+                } else {
+                    alert("Lütfen bir durum seçin.");
+                }
+            });
+        };
+    </script>
+}
+

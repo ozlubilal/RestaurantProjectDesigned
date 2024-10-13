@@ -1,0 +1,58 @@
+﻿@model Business.Dtos.Requests.OrderCreateDto
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Yeni Sipariş Ekle";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Yeni Sipariş Ekle</h2>
+
+    <form asp-action="Add" method="post">
+        <div class="mb-3">
+            <label for="ProductId" class="form-label">Ürün</label>
+            <select id="ProductId" name="ProductId" class="form-select">
+                <option value="">Seçiniz</option>
+                @foreach (var product in ViewBag.Products as List<Business.Dtos.Responses.ProductResponseDto>)
+                {
+                    <option value="@product.Id">@product.Name</option>
+                }
+            </select>
+            <span asp-validation-for="ProductId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="BillId" class="form-label">Fatura</label>
+            <select id="BillId" name="BillId" class="form-select">
+                <option value="">Seçiniz</option>
+                @foreach (var bill in ViewBag.Bills as List<Business.Dtos.Responses.BillResponseDto>)
+                {
+                    <option value="@bill.Id">@bill.TableName</option>
+                }
+            </select>
+            <span asp-validation-for="BillId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Quantity" class="form-label">Miktar</label>
+            <input asp-for="Quantity" class="form-control" />
+            <span asp-validation-for="Quantity" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Status" class="form-label">Durum</label>
+            <select asp-for="Status" class="form-control" asp-items="@(new SelectList(ViewBag.StatusList, "Value", "Text", Model.Status))">
+                <option value="">Durum seçin</option>
+            </select>
+            <span asp-validation-for="Status" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Ekle</button>
+        <a class="btn btn-secondary" href="@Url.Action("Index")">Geri Dön</a>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.11/dist/jquery.validate.unobtrusive.min.js"></script>
+}

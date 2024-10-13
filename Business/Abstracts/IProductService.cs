@@ -9,7 +9,6 @@ public interface IProductService
     IDataResult<List<ProductResponseDto>> GetList();
     IDataResult<ProductResponseDto> GetById(Guid id);
     IDataResult<List<ProductResponseDto>> GetByCategoryId(Guid categoryId);
-
     IResult Add(ProductCreateDto productCreateDto);
     IResult Update(ProductUpdateDto productUpdateDto);
     IResult Delete(Guid id);

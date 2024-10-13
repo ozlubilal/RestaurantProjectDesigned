@@ -22,6 +22,8 @@ public class Context : DbContext
     public DbSet<Order> Orders { get; set; }
     public DbSet<Table> Tables { get; set; }
     public DbSet<StoreBill> StoreBills { get; set; }
+    public DbSet<Payment> Payments { get; set; }
+    public DbSet<Visitor> Visitors { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

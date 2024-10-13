@@ -10,9 +10,11 @@ namespace Business.Abstract;
 public interface IBillService
 {
     IDataResult<List<BillResponseDto>> GetAll();
-    public IDataResult<List<Bill>> GetAllBills();
+    IDataResult<List<Bill>> GetAllBills();
     IDataResult<BillResponseDto> GetById(Guid id);
-    public IDataResult<Bill> GetBillById(Guid id);
+    IDataResult<Bill> GetBillById(Guid id);
+
+    IDataResult<List<BillResponseDto>> GetByStoreBillId(Guid id);
     IResult Add(BillCreateDto billCreateDto);
     IResult Update(BillUpdateDto billUpdateDto);
     IResult Delete(Guid id);

@@ -39,7 +39,10 @@ public class EfEntityRepositoryBase<TEntity, TContext> : IEntityRepository<TEnti
         return _context.Set<TEntity>().FirstOrDefault(filter);
     }
 
-    public List<TEntity> GetList(Expression<Func<TEntity, bool>> filter = null, Func<IQueryable<TEntity>, IQueryable<TEntity>> include = null)
+    public List<TEntity> GetList(
+       Expression<Func<TEntity, bool>> filter = null,
+       Func<IQueryable<TEntity>, IQueryable<TEntity>> include = null,
+       Expression<Func<TEntity, bool>> predicate = null)
     {
         IQueryable<TEntity> query = _context.Set<TEntity>();
 
@@ -48,10 +51,19 @@ public class EfEntityRepositoryBase<TEntity, TContext> : IEntityRepository<TEnti
             query = include(query);
         }
 
-        return filter == null ?
-            query.ToList() :
-            query.Where(filter).ToList();
+        if (filter != null)
+        {
+            query = query.Where(filter);
+        }
+
+        if (predicate != null)
+        {
+            query = query.Where(predicate);
+        }
+
+        return query.ToList();
     }
+
 
     public void Update(TEntity entity)
     {

@@ -13,5 +13,6 @@ namespace Business.Dtos.Responses
         public DateTime? ClosedDate { get; set; }
         public BillStatus Status { get; set; } // Enum int ya da enum olarak tutulabilir.
         public List<OrderResponseDto> Orders { get; set; } // Bağlı siparişlerin listesi
+
     }
 }

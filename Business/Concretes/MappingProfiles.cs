@@ -13,6 +13,17 @@ public class MappingProfile : Profile
         CreateMap<Product, ProductResponseDto>().ReverseMap();
         CreateMap<ProductUpdateDto, ProductResponseDto>().ReverseMap();
 
+        CreateMap<Order, OrderResponseDto>()
+            .ForMember(dest => dest.TableName, opt => opt.MapFrom(src => src.Bill.Table.TableName))
+            .ForMember(dest => dest.TableId, opt => opt.MapFrom(src => src.Bill.Table.Id))
+            .ForMember(dest => dest.BillDate, opt => opt.MapFrom(src => src.Bill.CreatedDate))
+            .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
+            .ForMember(dest=>dest.CategoryId, opt=>opt.MapFrom(src=>src.Product.Category.Id))
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Product.Category.Name)) // CategoryName için ekleme
+            .ReverseMap();
+        CreateMap<Order, OrderCreateDto>().ReverseMap();
+        CreateMap<Order, OrderUpdateDto>().ReverseMap();
+        CreateMap<OrderResponseDto, OrderUpdateDto>()  .ReverseMap();
 
         CreateMap<CategoryCreateDto, Category>().ReverseMap();
         CreateMap<CategoryUpdateDto, Category>().ReverseMap();
@@ -35,5 +46,14 @@ public class MappingProfile : Profile
         CreateMap<BillUpdateDto, BillResponseDto>().ReverseMap();
 
         //CreateMap<ProductResponseDto, ProductUpdateDto>();
+
+        CreateMap<Payment, PaymentResponseDto>()
+           .ForMember(dest => dest.BillId, opt => opt.MapFrom(src => src.BillId)) // Ödeme faturası ID'si
+           .ForMember(dest => dest.StoreBillId, opt => opt.MapFrom(src => src.Bill.StoreBillId)) // İlgili StoreBill ID'si
+           .ForMember(dest => dest.TableId, opt => opt.MapFrom(src => src.Bill.TableId)) // İlgili masa ID'si
+           .ForMember(dest => dest.TableName, opt => opt.MapFrom(src => src.Bill.Table.TableName)) // Masa adı
+           .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.Amount)) // Ödeme tutarı
+           .ForMember(dest => dest.PaymentMethod, opt => opt.MapFrom(src => src.PaymentMethod)).ReverseMap(); // Ödeme yöntemi
+        CreateMap<Payment, PaymentCreateDto>().ReverseMap();
     }
 }

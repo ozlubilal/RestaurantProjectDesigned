@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
 using Business.Abstracts;
 using Business.Aspects.Autofac;
+using Business.BusinessRule;
+using Business.Constants;
 using Business.Dtos.Requests;
 using Business.Dtos.Responses;
+using Core.Utilities.Business;
 using Core.Utilities.Results;
 using DataAccess.Abstracts;
 using Entities.Concretes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Business.Concretes;
 
@@ -16,13 +16,14 @@ public class CategoryManager : ICategoryService
 {
     private readonly ICategoryDal _categoryDal;
     private readonly IMapper _mapper;
+    private readonly CategoryBusinessRules _categoryBusinessRules;
 
-    public CategoryManager(ICategoryDal categoryDal, IMapper mapper)
+    public CategoryManager(ICategoryDal categoryDal, IMapper mapper, CategoryBusinessRules categoryBusinessRules)
     {
         _categoryDal = categoryDal;
         _mapper = mapper;
+        _categoryBusinessRules = categoryBusinessRules;
     }
-   // [SecuredOperation("Admin")]
     public IDataResult<List<CategoryResponseDto>> GetList()
     {
         var categories = _categoryDal.GetList();
@@ -39,11 +40,18 @@ public class CategoryManager : ICategoryService
     [SecuredOperation("Admin")]
     public IResult Add(CategoryCreateDto categoryCreateDto)
     {
+        IResult result = BusinessRules.Run(_categoryBusinessRules.CheckIfCategoryNameExist(categoryCreateDto.Name, categoryCreateDto.Id));
+
+        if (result != null)
+        {
+            return result;
+        }
+
         var category = _mapper.Map<Category>(categoryCreateDto);
         _categoryDal.Add(category);
-        return new SuccessResult("Category added successfully.");
+        return new SuccessResult(Messages.CategoryAdded);
     }
-
+    [SecuredOperation("Admin")]
     public IResult Update(CategoryUpdateDto categoryUpdateDto)
     {
         // Önce mevcut kategori nesnesini bul
@@ -51,27 +59,41 @@ public class CategoryManager : ICategoryService
 
         if (existingCategory == null)
         {
-            return new ErrorResult("Category not found.");
+            return new ErrorResult(Messages.CategoryNotFound);
         }
 
-        // Güncellenmiş verileri mevcut nesneye uygulayın
-        existingCategory.Name = categoryUpdateDto.Name;
+        _mapper.Map(categoryUpdateDto, existingCategory);
 
-        // Güncellenmiş nesneyi kaydedin
+        IResult result = BusinessRules.Run(_categoryBusinessRules.CheckIfCategoryNameExist(categoryUpdateDto.Name, categoryUpdateDto.Id));
+
+        if (result != null)
+        {
+            return result;
+        }
+
         _categoryDal.Update(existingCategory);
 
-        return new SuccessResult("Category updated successfully.");
+        return new SuccessResult(Messages.CategoryUpdated);
     }
 
-
+    [SecuredOperation("Admin")]
     public IResult Delete(Guid id)
-    {
+    {     
         var category = _categoryDal.Get(c => c.Id == id);
+
         if (category != null)
         {
+            //Kategoriye ait ürün varsa kategori silinemez.
+            IResult result = BusinessRules.Run(_categoryBusinessRules.CheckIfCategoryHasProducts(id));
+
+            if (result != null)
+            {
+                return result;
+            }
             _categoryDal.Delete(category);
-            return new SuccessResult("Category deleted successfully.");
+            return new SuccessResult(Messages.CategoryDeleted);
         }
-        return new ErrorResult("Category not found.");
+
+        return new ErrorResult(Messages.CategoryNotFound);
     }
 }

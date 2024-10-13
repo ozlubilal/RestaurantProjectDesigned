@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - WebApplication1</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+
+    <style>
+        /* Toastr custom styles */
+        .toast-success {
+            background-color: #28a745 !important; /* Success - Green */
+            color: white !important;
+        }
+
+        .toast-error {
+            background-color: #dc3545 !important; /* Error - Red */
+            color: white !important;
+        }
+
+        .toast-warning {
+            background-color: #ffc107 !important; /* Warning - Yellow */
+            color: black !important;
+        }
+
+        .toast-info {
+            background-color: #17a2b8 !important; /* Info - Blue */
+            color: white !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">       
+            @RenderBody()       
+    </div>
+
+    <!-- JavaScript files -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @RenderSection("Scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+            // Toastr settings
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right", // Position
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000", // Duration for which the message is visible
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+
+            // Show success message if exists
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>toastr.success('@TempData["SuccessMessage"]'); </text>
+        }
+
+                // Show error message if exists
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>toastr.error('@TempData["ErrorMessage"]'); </text>
+        }
+
+                // Show warning message if exists
+        @if (TempData["WarningMessage"] != null)
+        {
+            <text>toastr.warning('@TempData["WarningMessage"]'); </text>
+        }
+                });
+    </script>
+</body>
+</html>

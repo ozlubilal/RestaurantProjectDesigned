@@ -1,0 +1,121 @@
+﻿@model List<Business.Dtos.Responses.TableResponseDto>
+
+@{
+    ViewData["Title"] = "Masa Durumu";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .grid-item {
+            border-radius: 8px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+            .grid-item.available {
+                background-color: #66bb6a;
+            }
+
+            .grid-item.occupied {
+                background-color: #ef5350;
+            }
+
+            .grid-item:hover {
+                transform: scale(1.05);
+                box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            }
+
+        /* Kullanıcı adı ve çıkış butonu için stil */
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .header .username {
+                font-size: 16px;
+            }
+
+            .header a.logout-button {
+                color: white;
+                background-color: #f44336;
+                padding: 8px 16px;
+                border-radius: 4px;
+                text-decoration: none;
+                transition: background-color 0.3s;
+            }
+
+                .header a.logout-button:hover {
+                    background-color: #d32f2f;
+                }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="username">
+            Hoşgeldiniz, @User.Identity.Name
+        </div>
+        <a href="@Url.Action("Logout", "Account")" class="logout-button">Çıkış Yap</a>
+    </div>
+
+    <h1>Masalar</h1>
+
+    <div class="container">
+        <div class="grid-container">
+            @foreach (var table in Model)
+            {
+                <a href="@Url.Action("TableOrderDetails", "WaiterTable", new { tableId = table.Id })">
+                    <div class="grid-item @(table.Status == Entities.Enums.TableStatus.Dolu ? "occupied" : "available")">
+                        <h3>@table.TableName</h3>
+                        <p>@table.Status.ToString()</p>
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+
+</body>
+</html>

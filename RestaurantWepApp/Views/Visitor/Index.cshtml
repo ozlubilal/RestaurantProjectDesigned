@@ -1,0 +1,39 @@
+﻿@model IEnumerable<Entities.Concretes.Visitor>
+
+@{
+    ViewData["Title"] = "Visitor List";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<!-- Tümünü Sil Butonu -->
+<form asp-action="DeleteAll" method="post" style="margin-bottom: 15px;">
+    <button type="submit" class="btn btn-danger">Tümünü Sil</button>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>URL</th>
+            <th>Visit Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var visitor in Model)
+            {
+                <tr>
+                    <td>@visitor.Url</td>
+                    <td>@visitor.VisitTime.ToString("g")</td> <!-- Zaman formatı -->
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="2">No visitors found.</td>
+            </tr>
+        }
+    </tbody>
+</table>

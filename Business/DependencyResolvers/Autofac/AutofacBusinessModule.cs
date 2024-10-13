@@ -3,6 +3,7 @@ using Autofac.Extras.DynamicProxy;
 using AutoMapper;
 using Business.Abstract;
 using Business.Abstracts;
+using Business.BusinessRule;
 using Business.Concrete;
 using Business.Concretes;
 using Castle.DynamicProxy;
@@ -34,6 +35,22 @@ public class AutofacBusinessModule : Module
         builder.RegisterType<UserManager>().As<IUserService>();
         builder.RegisterType<EfUserDal>().As<IUserDal>();
 
+        builder.RegisterType<PaymentManager>().As<IPaymentService>();
+        builder.RegisterType<EfPaymentDal>().As<IPaymentDal>();
+
+        builder.RegisterType<VisitorManager>().As<IVisitorService>();
+        builder.RegisterType<EfVisitorDal>().As<IVisitorDal>();
+
+        builder.RegisterType<ProductBusinessRules>().AsSelf();
+        builder.RegisterType<CategoryBusinessRules>().AsSelf();
+        builder.RegisterType<TableBusinessRules>().AsSelf();
+        builder.RegisterType<PaymentBusinessRules>().AsSelf();
+        builder.RegisterType<BillBusinessRules>().AsSelf();
+        builder.RegisterType<StoreBillBusinessRules>().AsSelf();
+        builder.RegisterType<OrderBusinessRules>().AsSelf();
+
+
+
         //builder.RegisterType<OperationClaimManager>().As<IOperationClaimService>().SingleInstance();
         //builder.RegisterType<EfOperationClaimDal>().As<IOperationClaimDal>().SingleInstance();
 
@@ -63,7 +80,7 @@ public class AutofacBusinessModule : Module
             cfg.AddMaps(Assembly.GetExecutingAssembly()); // Assembly sınıfı için System.Reflection gereklidir
         })).AsSelf().SingleInstance();
 
-       // builder.RegisterType<MemoryCache>().As<IMemoryCache>().SingleInstance();
+        // builder.RegisterType<MemoryCache>().As<IMemoryCache>().SingleInstance();
 
         // IMapper servisini kaydediyoruz
         builder.Register(context =>
@@ -72,7 +89,7 @@ public class AutofacBusinessModule : Module
             var config = ctx.Resolve<MapperConfiguration>();
             return config.CreateMapper();
         }).As<IMapper>().InstancePerLifetimeScope();
-       
+
         var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
         builder.RegisterAssemblyTypes(assembly).AsImplementedInterfaces()

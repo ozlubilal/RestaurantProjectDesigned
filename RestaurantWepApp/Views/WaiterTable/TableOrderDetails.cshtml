@@ -1,0 +1,251 @@
+﻿@using Business.Dtos.Responses
+@model List<OrderResponseDto>
+@using Entities.Enums
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var products = ViewBag.products as List<Product>;
+    var categories = ViewBag.categories as List<CategoryResponseDto>;
+    var tableStatus = (TableStatus)ViewBag.table.Status;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sipariş Detayları</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f0f4f8;
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+        }
+
+        .sidebar {
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            overflow-y: auto;
+        }
+
+            .sidebar h4 {
+                margin-top: 15px;
+                cursor: pointer;
+                color: #ecf0f1;
+            }
+
+            .sidebar ul {
+                list-style: none;
+                padding-left: 15px;
+                display: none;
+            }
+
+                .sidebar ul li {
+                    margin-bottom: 5px;
+                }
+
+                    .sidebar ul li button {
+                        width: 100%;
+                        text-align: left;
+                        background-color: transparent;
+                        border: none;
+                        color: #bdc3c7;
+                        padding: 5px 10px;
+                        cursor: pointer;
+                        transition: background-color 0.3s;
+                    }
+
+                        .sidebar ul li button:hover {
+                            background-color: #34495e;
+                            color: #ecf0f1;
+                        }
+
+        .main-content {
+            margin-left: 270px;
+            padding: 20px;
+        }
+
+        .order-details-header {
+            background-color: #e74c3c;
+            color: #fff;
+            padding: 15px;
+            border-radius: 8px 8px 0 0;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+            .order-details-header h1 {
+                font-size: 1.8rem;
+                font-family: 'Arial', sans-serif;
+                margin: 0;
+            }
+
+        .order-details-card {
+            padding: 20px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-table th {
+            background-color: #f2f2f2;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>Kategoriler</h2>
+        @if (products != null && categories != null)
+        {
+            @foreach (var category in categories)
+            {
+                @if (products.Any(p => p.CategoryId == category.Id && ViewBag.table.Status == TableStatus.Dolu))
+                {
+                    <h4 class="category-header" data-category-id="@category.Id">@category.Name</h4>
+                    <ul id="product-list-@category.Id">
+
+                        @foreach (var product in products.Where(p => p.CategoryId == category.Id))
+                        {
+                            <li>
+                                <a href="@Url.Action("AddOrder", "WaiterTable", new { productId = product.Id, billId =  ViewBag.billId, tableId = @ViewBag.table.Id })" class="btn btn-link">
+                                    @product.Name
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                }
+            }
+        }
+        else
+        {
+            <p>Ürün veya kategori listesi boş.</p>
+        }
+    </div>
+
+    <div class="main-content">
+        <div class="order-details-card">
+            <div class="order-details-header">
+                @if (Model != null && Model.Count > 0)
+                {
+                    <h1>@Model.FirstOrDefault().TableName Sipariş Detayları</h1>
+                }
+                else
+                {
+                    <h1>Sipariş Detayları</h1>
+                }
+            </div>
+
+            @if (Model == null || Model.Count == 0 && tableStatus != TableStatus.Boş)
+            {
+                <p class="text-center">Henüz sipariş bulunmamaktadır.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered order-table">
+                        <thead>
+                            <tr>
+                                <th>Ürün Adı</th>
+                                <th>Miktar</th>
+                                <th>Durum</th>
+                                <th>Aksiyon</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model)
+                            {
+                                <tr>
+                                    <td>@order.ProductName</td>
+                                    <td id="quantity-@order.Id">@order.Quantity</td>
+                                    <td>@order.Status</td>
+                                    <td>
+                                        <button class="btn btn-secondary btn-sm" onclick="updateQuantity('@order.Id', -1)">-</button>
+                                        <button class="btn btn-secondary btn-sm" onclick="updateQuantity('@order.Id', 1)">+</button>
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("DeleteOrder", "WaiterTable", new { orderId = order.Id, tableId = @ViewBag.table.Id })" class="btn btn-danger" onclick="return confirm('Bu siparişi silmek istediğinizden emin misiniz?');">
+                                            Sil
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            <div class="text-center mt-4">
+                @if (tableStatus == TableStatus.Boş)
+                {
+                    <a href="@Url.Action("OpenBill", "WaiterTable", new { tableId = @ViewBag.table.Id })" class="btn btn-success">Hesap Aç</a>
+                }
+                else if (Model == null || Model.Count == 0)
+                {
+                    <a href="@Url.Action("DeleteBill", "WaiterTable", new { billId = @ViewBag.billId })" class="btn btn-danger" onclick="return confirm('Hesabı iptal etmek istediğinize emin misiniz?');">Hesabı İptal Et</a>
+                }
+            </div>
+            <div class="text-center mt-4">
+                <a href="@Url.Action("Index", "WaiterTable")" class="btn btn-primary">Geri Dön</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.category-header').on('click', function () {
+                var categoryId = $(this).data('category-id');
+                $('.sidebar ul').not('#product-list-' + categoryId).slideUp();
+                $('#product-list-' + categoryId).slideToggle();
+            });
+        });
+
+        function updateQuantity(orderId, change) {
+            var quantityElement = document.getElementById("quantity-" + orderId);
+            var currentQuantity = parseInt(quantityElement.innerText);
+            var newQuantity = currentQuantity + change;
+
+            if (newQuantity < 0) {
+                alert("Miktar 0'dan az olamaz.");
+                return;
+            }
+
+            quantityElement.innerText = newQuantity;
+
+            if (newQuantity === 0) {
+                $(quantityElement).closest('tr').remove();
+            }
+
+            $.ajax({
+                url: '@Url.Action("UpdateOrderQuantity", "WaiterTable")',
+                type: 'POST',
+                data: {
+                    orderId: orderId,
+                    quantity: newQuantity
+                },
+                success: function (response) {
+                    console.log("Miktar başarıyla güncellendi.");
+                },
+                error: function (error) {
+                    console.error("Miktar güncellenirken hata oluştu:", error);
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,122 @@
+﻿@model Business.Dtos.Requests.UserForRegisterDto
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Ol</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+            button:hover {
+                background-color: #218838;
+            }
+
+        .error-messages {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+            .error-messages ul {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+
+            .error-messages li {
+                margin: 5px 0;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Kayıt Ol</h2>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="error-messages">
+                <ul>
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <li>@error.ErrorMessage</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <form asp-action="Register" method="post">
+            <div>
+                <label for="Email">Email:</label>
+                <input type="text" id="Email" name="Email" value="@Model?.Email" />
+            </div>
+            <div>
+                <label for="Password">Şifre:</label>
+                <input type="password" id="Password" name="Password" required />
+            </div>
+            <div>
+                <label for="FirstName">Ad:</label>
+                <input type="text" id="FirstName" name="FirstName" value="@Model?.FirstName" required />
+            </div>
+            <div>
+                <label for="LastName">Soyad:</label>
+                <input type="text" id="LastName" name="LastName" value="@Model?.LastName" required />
+            </div>
+            <button type="submit">Kayıt Ol</button>
+        </form>
+    </div>
+</body>
+</html>

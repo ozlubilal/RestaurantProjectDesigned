@@ -3,6 +3,6 @@
 public enum OrderStatus
 {
     Hazırlanıyor = 1,
-    Bekliyor = 2,
+    Hazır = 2,
     Servis_Edildi = 3
 }

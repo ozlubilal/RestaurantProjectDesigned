@@ -1,0 +1,283 @@
+﻿@model IEnumerable<Business.Dtos.Responses.OrderResponseDto>
+@{    
+    var currentStatus = ViewBag.CurrentStatus;
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chef Orders</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f0f4f8;
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+        }
+
+        .sidebar {
+            width: 200px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+            .sidebar ul {
+                padding: 0;
+            }
+
+                .sidebar ul li {
+                    margin-bottom: 15px;
+                }
+
+            .sidebar a {
+                text-align: center;
+                display: block;
+                padding: 10px;
+                font-size: 18px;
+                border-radius: 5px;
+                color: white;
+                text-decoration: none;
+            }
+
+                .sidebar a:hover {
+                    opacity: 0.8;
+                }
+
+        .main-content {
+            margin-left: 220px;
+            padding: 20px;
+        }
+
+        .status-button {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 16px;
+            outline: none;
+            text-align: center;
+        }
+
+        .status-column {
+            min-width: 120px;
+        }
+
+        .status-preparing {
+            background-color: #f39c12;
+        }
+
+        .status-ready {
+            background-color: #4CAF50;
+        }
+
+        .status-served {
+            background-color: #3498db;
+        }
+
+        .status-button:hover {
+            opacity: 0.8;
+        }
+
+        .status-button:focus {
+            outline: none;
+        }
+
+        .undo-label {
+            color: #e74c3c;
+            margin-left: 10px;
+            font-size: 16px;
+        }
+
+        .user-info .btn {
+            padding: 5px 10px;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+
+
+        .action-column {
+            width: 150px;
+        }
+
+        /* Sidebar'ın en altında kullanıcı bilgileri ve çıkış butonu */
+        .sidebar .user-info {
+            margin-top: auto;
+            text-align: center;
+        }
+
+            .sidebar .user-info a {
+                margin-top: 10px;
+                background-color: #e74c3c;
+            }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Filtrele</h2>
+        <ul class="list-unstyled">
+            <li>
+                <a href="@Url.Action("FilterByStatus", "Chef", new { status = Entities.Enums.OrderStatus.Hazırlanıyor })" class="btn btn-warning btn-block">
+                    Hazırlanıyor
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("FilterByStatus", "Chef", new { status = Entities.Enums.OrderStatus.Hazır })" class="btn btn-success btn-block">
+                    Hazır
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("FilterByStatus", "Chef", new { status = Entities.Enums.OrderStatus.Servis_Edildi })" class="btn btn-info btn-block">
+                    Servis Edildi
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "Chef")" class="btn btn-secondary btn-block">
+                    Tüm Siparişler
+                </a>
+            </li>
+        </ul>
+
+        <!-- Kullanıcı adı ve Çıkış Butonu -->
+        <div class="user-info">
+            <p>Hoşgeldiniz, @User.Identity.Name</p>
+            <a href="@Url.Action("Logout", "Account")" class="btn btn-danger btn-block">Çıkış Yap</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h2>Siparişler</h2>
+        <input type="hidden" id="currentStatus" value="@currentStatus" />
+
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        Masa
+                        <select id="table" name="tableId" class="form-control" onchange="filterOrders()">
+                            <option value="">Tüm Masalar</option>
+                            @foreach (var table in ViewBag.Tables)
+                            {
+                                <option value="@table.Id">@table.TableName</option>
+                            }
+                        </select>
+                    </th>
+                    <th>
+                        Kategori
+                        <select id="category" name="categoryId" class="form-control" onchange="filterOrders()">
+                            <option value="">Tüm Kategoriler</option>
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </th>
+                    <th>
+                        Ürün
+                        <select id="product" name="productId" class="form-control" onchange="filterOrders()">
+                            <option value="">Tüm Ürünler</option>
+                            @foreach (var product in ViewBag.Products)
+                            {
+                                <option value="@product.Id">@product.Name</option>
+                            }
+                        </select>
+                    </th>
+                    <th>Adet</th>
+                    <th>Fiyat</th>
+                    <th class="status-column">Durum</th>
+                    <th class="action-column">Aksiyon</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var order in Model)
+                    {
+                        <tr>
+                            <td>@order.TableName</td>
+                            <td>@order.CategoryName</td>
+                            <td>@order.ProductName</td>
+                            <td>@order.Quantity</td>
+                            <td>@order.Price.ToString("C")</td>
+                            <td>@order.Status.ToString()</td>
+                            <td class="action-column">
+                                @if (order.Status == Entities.Enums.OrderStatus.Hazırlanıyor)
+                                {
+                                    <a href="@Url.Action("UpdateOrderStatus", "Chef", new { id = order.Id, newStatus = (int)Entities.Enums.OrderStatus.Hazır, currentStatus = currentStatus })" class="status-button status-preparing">
+                                        &#10003;
+                                    </a>
+                                }
+                                else if (order.Status == Entities.Enums.OrderStatus.Hazır)
+                                {
+                                    <a href="@Url.Action("UpdateOrderStatus", "Chef", new { id = order.Id, newStatus = (int)Entities.Enums.OrderStatus.Servis_Edildi, currentStatus = currentStatus })" class="status-button status-ready">
+                                        &#10140;
+                                    </a>
+                                    <a href="@Url.Action("UpdateOrderStatus", "Chef", new { id = order.Id, newStatus = (int)Entities.Enums.OrderStatus.Hazırlanıyor, currentStatus = currentStatus })" class="undo-label">
+                                        Geri Al
+                                    </a>
+                                }
+                                else if (order.Status == Entities.Enums.OrderStatus.Servis_Edildi)
+                                {
+                                    <span class="status-button status-served" style="color: white; font-size: 20px;">🍽️</span>
+                                    <a href="@Url.Action("UpdateOrderStatus", "Chef", new { id = order.Id, newStatus = (int)Entities.Enums.OrderStatus.Hazır, currentStatus = currentStatus })" class="undo-label">
+                                        Geri Al
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center">Sipariş bulunamadı</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        function filterOrders() {
+            var tableId = $('#table').val();
+            var categoryId = $('#category').val();
+            var productId = $('#product').val();
+            var currentStatus = $('#currentStatus').val(); // Gizli alandan al
+    
+            console.log("currentStatus:", currentStatus);
+            $.ajax({
+                url: '@Url.Action("Index", "Chef")',
+                type: 'GET',
+                data: {
+                    tableId: tableId,
+                    categoryId: categoryId,
+                    productId: productId,
+                    currentStatus: currentStatus
+                },
+                success: function (result) {
+                    var newBody = $(result).find('tbody').html();
+                    $('tbody').html(newBody);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

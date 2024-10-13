@@ -1,4 +1,5 @@
 ﻿using Entities.Concretes;
+using Entities.Enums;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
@@ -14,11 +15,10 @@ public class ProductValidator:AbstractValidator<Product>
     {
        RuleFor(p=>p.Name).NotEmpty();
 
-        RuleFor(p => p.Name).Must(StartWithWithA).WithMessage("Ürünler A harfi ile başlamalı");
+        RuleFor(p => p.Price).GreaterThan(0).WithMessage("Ürün fiyatı 0'dan büyük olmalıdır.");
+        RuleFor(p => p.Name).NotEmpty().WithMessage("Ürün adı boş geçilemez.");
+        RuleFor(p => p.Status).IsInEnum().WithMessage("Ürün statusu bo ş olamaz");
     }
 
-    private bool StartWithWithA(string arg)
-    {
-        return arg.StartsWith("A");
-    }
+  
 }

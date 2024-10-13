@@ -1,0 +1,29 @@
+﻿@model Business.Dtos.Responses.TableResponseDto
+
+@{
+    ViewData["Title"] = "Ödeme Al";
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>@Model.TableName için Ödeme Al</h1>
+
+        <form asp-action="SubmitPayment" method="post">
+            <input type="hidden" name="tableId" value="@Model.Id" />
+            <div class="form-group">
+                <label for="amount">Ödenecek Tutar:</label>
+                <input type="number" class="form-control" id="amount" name="amount" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Ödemeyi Tamamla</button>
+        </form>
+    </div>
+</body>
+</html>

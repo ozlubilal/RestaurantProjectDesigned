@@ -1,0 +1,198 @@
+﻿@model List<Business.Dtos.Responses.TableResponseDto>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #34495e;
+            color: white;
+            padding: 20px;
+            height: 100vh;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+            /* Kullanıcı bilgileri ve çıkış butonu */
+            .sidebar .user-info {
+                margin-top: 20px;
+                text-align: center;
+            }
+
+                .sidebar .user-info p {
+                    font-size: 16px;
+                    margin: 5px 0;
+                }
+
+            .sidebar .logout-button {
+                color: white;
+                background-color: #e74c3c;
+                padding: 6px 12px;
+                border-radius: 4px;
+                font-size: 12px;
+                display: inline-block;
+                margin-top: 10px;
+                transition: background-color 0.3s;
+            }
+
+                .sidebar .logout-button:hover {
+                    background-color: #c0392b;
+                }
+
+            .sidebar h2 {
+                font-size: 22px;
+                font-weight: 600;
+                margin-bottom: 15px;
+            }
+
+            .sidebar p {
+                font-size: 18px;
+                margin: 5px 0;
+            }
+
+            .sidebar hr {
+                border: none;
+                height: 1px;
+                background-color: #7f8c8d;
+                margin: 15px 0;
+            }
+
+            .sidebar strong {
+                font-size: 20px;
+            }
+
+        /* Container */
+        .container {
+            margin-left: 270px;
+            padding: 20px;
+            height: 100vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+            width: calc(100% - 270px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 40px;
+            font-weight: 600;
+            font-size: 32px;
+        }
+
+        /* Grid Style */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .grid-item {
+            border-radius: 12px;
+            padding: 30px;
+            background-color: white;
+            color: #2c3e50;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+            /* Masa Durumu */
+            .grid-item h3 {
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+
+            .grid-item.available {
+                background-color: #66bb6a;
+                color: white;
+            }
+
+            .grid-item.occupied {
+                background-color: #e74c3c;
+                color: white;
+            }
+
+            .grid-item p {
+                font-size: 18px;
+                font-weight: 400;
+                margin-top: 5px;
+            }
+
+        /* Footer for Sidebar */
+        .sidebar-footer {
+            text-align: center;
+            padding-top: 10px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div>
+            <h2>Tahsilatlar</h2>
+            <p>Kredi Kartı: @ViewBag.CreditCardTotal.ToString("C")</p>
+            <p>Nakit: @ViewBag.CashTotal.ToString("C")</p>
+            <hr>
+            <p><strong>Genel Toplam: @ViewBag.TotalCollection.ToString("C")</strong></p>
+        </div>
+
+
+        <div class="sidebar-footer">
+            <p class="text-light">Hoşgeldiniz, @User.Identity.Name</p>
+            <a href="@Url.Action("Logout", "Account")" class="logout-button">Çıkış</a>
+            <br />&copy; 2024 Restaurant Management
+        </div>
+    </div>
+
+    <!-- Masalar -->
+    <div class="main-content">
+        <h1>Masalar</h1>
+
+        <div class="grid-container">
+            @foreach (var table in Model.Where(t => t.Status != Entities.Enums.TableStatus.Boş))
+            {
+                <a href="@Url.Action("TableOrderDetails", "Cashier", new { tableId = table.Id })">
+                    <div class="grid-item @(table.Status == Entities.Enums.TableStatus.Dolu ? "occupied" : "available")">
+                        <h3>@table.TableName</h3>
+                        <p>@table.Status.ToString()</p>
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+</body>
+</html>
+</html>
